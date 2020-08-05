@@ -12,10 +12,12 @@ when inside the directory containing this file.
 -}
 
 import NoNoOpMsg
+import NoUselessCmdNone
 import Review.Rule exposing (Rule)
 
 
 config : List Rule
 config =
     [ NoNoOpMsg.rule
+    , NoUselessCmdNone.rule
     ]

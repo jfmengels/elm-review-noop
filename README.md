@@ -5,6 +5,7 @@ Provides [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-revi
 
 ## Provided rules
 
+- [`NoUselessCmdNone`](https://package.elm-lang.org/packages/jfmengels/elm-review-noop/1.0.0/NoUselessCmdNone) - Reports functions that never make use of their power to return Cmds.
 - [`NoNoOpMsg`](https://package.elm-lang.org/packages/jfmengels/elm-review-noop/1.0.0/NoNoOpMsg) - Reports NoOp messages.
 
 
@@ -14,11 +15,13 @@ Provides [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-revi
 module ReviewConfig exposing (config)
 
 import NoNoOpMsg
+import NoUselessCmdNone
 import Review.Rule exposing (Rule)
 
 config : List Rule
 config =
     [ NoNoOpMsg.rule
+    , NoUselessCmdNone.rule
     ]
 ```
 
