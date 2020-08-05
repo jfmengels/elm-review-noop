@@ -64,6 +64,7 @@ declarationVisitor node =
                             |> Node.value
                             |> .name
                     )
+                |> List.filter (\constructorName -> Node.value constructorName == "NoOp")
                 |> List.map error
 
         _ ->
