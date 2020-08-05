@@ -52,7 +52,7 @@ This rule is not useful when you are writing a package.
 You can try this rule out by running the following command:
 
 ```bash
-elm - review --template jfmengels/elm-review-noop/example --rules NoUselessCmdNone
+elm-review --template jfmengels/elm-review-noop/preview --rules NoUselessCmdNone
 ```
 
 -}

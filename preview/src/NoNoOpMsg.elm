@@ -40,7 +40,7 @@ This rule is not useful when you are working on a package, since you don't have 
 You can try this rule out by running the following command:
 
 ```bash
-elm - review --template jfmengels/elm-review-noop/example --rules NoNoOpMsg
+elm-review --template jfmengels/elm-review-noop/preview --rules NoNoOpMsg
 ```
 
 -}
