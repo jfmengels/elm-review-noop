@@ -116,7 +116,7 @@ error range =
     Rule.error
         { message = "This function always returns Cmd.none"
         , details =
-            [ "Since this function returns Cmd.none in all cases, you can simplify it by having it not return a Cmd"
+            [ "Since this function returns Cmd.none in all cases, you can simplify it by having it not return a Cmd."
             ]
         }
         range
