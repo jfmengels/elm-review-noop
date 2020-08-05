@@ -51,4 +51,30 @@ update msg model =
 """
                     |> Review.Test.run rule
                     |> Review.Test.expectNoErrors
+        , test "should report errors when all branches return Cmd.none" <|
+            \() ->
+                """module A exposing (..)
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  case msg of
+    ClickedIncrement ->
+        ( model + 1, Cmd.none )
+    ClickedDecrement ->
+        ( model - 1, Cmd.none )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = "REPLACEME"
+                            , details = [ "REPLACEME" ]
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 6, column = 22 }, end = { row = 6, column = 30 } }
+                        , Review.Test.error
+                            { message = "REPLACEME"
+                            , details = [ "REPLACEME" ]
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 8, column = 22 }, end = { row = 8, column = 30 } }
+                        ]
         ]
