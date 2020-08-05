@@ -1,11 +1,11 @@
 # elm-review-noop
 
-Provides [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) rules to REPLACEME.
+Provides [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) rules to forbid NoOp messages.
 
 
 ## Provided rules
 
-- [`NoNoOpMsg`](https://package.elm-lang.org/packages/jfmengels/elm-review-noop/1.0.0/NoNoOpMsg) - Reports REPLACEME.
+- [`NoNoOpMsg`](https://package.elm-lang.org/packages/jfmengels/elm-review-noop/1.0.0/NoNoOpMsg) - Reports NoOp messages.
 
 
 ## Configuration

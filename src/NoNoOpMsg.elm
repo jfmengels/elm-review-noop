@@ -7,12 +7,11 @@ module NoNoOpMsg exposing (rule)
 -}
 
 import Elm.Syntax.Declaration as Declaration exposing (Declaration)
-import Elm.Syntax.Expression exposing (Expression)
 import Elm.Syntax.Node as Node exposing (Node)
 import Review.Rule as Rule exposing (Error, Rule)
 
 
-{-| Reports... REPLACEME
+{-| Reports NoOp messages
 
     config =
         [ NoNoOpMsg.rule
@@ -21,20 +20,19 @@ import Review.Rule as Rule exposing (Error, Rule)
 
 ## Fail
 
-    a =
-        "REPLACEME example to replace"
+    type Msg
+        = NoOp
 
 
 ## Success
 
-    a =
-        "REPLACEME example to replace"
+    type Msg
+        = DomNodeWasFocused
 
 
 ## When (not) to enable this rule
 
-This rule is useful when REPLACEME.
-This rule is not useful when REPLACEME.
+This rule is not useful when you are working on a package, since you don't have an update function.
 
 
 ## Try it out

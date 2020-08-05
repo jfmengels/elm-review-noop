@@ -1,7 +1,7 @@
 {
   "type": "package",
   "name": "jfmengels/elm-review-noop",
-  "summary": "Provides elm-review rules to REPLACEME",
+  "summary": "Provides elm-review rules to forbid NoOp messages",
   "license": "BSD-3-Clause",
   "version": "1.0.0",
   "exposed-modules": [
