@@ -56,12 +56,22 @@ a = 1
 """
                     |> Review.Test.run rule
                     |> Review.Test.expectNoErrors
-        , test "should not report an error when the constrcutor name is not NoOp" <|
+        , test "should not report an error when the constructor name is not NoOp" <|
             \() ->
                 """module A exposing (..)
 type Msg
   = Foo
   | Bar
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectNoErrors
+        , test "should not report an error when we see NoOp in pattern matching" <|
+            \() ->
+                """module A exposing (..)
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+     NoOp -> model
 """
                     |> Review.Test.run rule
                     |> Review.Test.expectNoErrors
