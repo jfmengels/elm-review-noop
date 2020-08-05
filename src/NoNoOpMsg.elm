@@ -58,14 +58,13 @@ declarationVisitor node =
     case Node.value node of
         Declaration.CustomTypeDeclaration { constructors } ->
             constructors
-                --|> List.filter ()
                 |> List.map
                     (\constructor ->
                         constructor
                             |> Node.value
                             |> .name
-                            |> error
                     )
+                |> List.map error
 
         _ ->
             []
