@@ -5,6 +5,17 @@ import Review.Test
 import Test exposing (Test, describe, test)
 
 
+message : String
+message =
+    "This function always returns Cmd.none"
+
+
+details : List String
+details =
+    [ "Since this function returns Cmd.none in all cases, you can simplify it by having it not return a Cmd"
+    ]
+
+
 all : Test
 all =
     describe "NoUselessCmdNone"
@@ -21,8 +32,8 @@ update msg model =
                     |> Review.Test.run rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
-                            { message = "REPLACEME"
-                            , details = [ "REPLACEME" ]
+                            { message = message
+                            , details = details
                             , under = "Cmd.none"
                             }
                         ]
@@ -65,14 +76,14 @@ update msg model =
                     |> Review.Test.run rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
-                            { message = "REPLACEME"
-                            , details = [ "REPLACEME" ]
+                            { message = message
+                            , details = details
                             , under = "Cmd.none"
                             }
                             |> Review.Test.atExactly { start = { row = 6, column = 22 }, end = { row = 6, column = 30 } }
                         , Review.Test.error
-                            { message = "REPLACEME"
-                            , details = [ "REPLACEME" ]
+                            { message = message
+                            , details = details
                             , under = "Cmd.none"
                             }
                             |> Review.Test.atExactly { start = { row = 8, column = 22 }, end = { row = 8, column = 30 } }
@@ -91,8 +102,8 @@ update msg model =
                         |> Review.Test.run rule
                         |> Review.Test.expectErrors
                             [ Review.Test.error
-                                { message = "REPLACEME"
-                                , details = [ "REPLACEME" ]
+                                { message = message
+                                , details = details
                                 , under = "none"
                                 }
                             ]

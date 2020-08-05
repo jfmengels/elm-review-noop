@@ -114,7 +114,9 @@ expressionVisitor node context =
 error : Range -> Error {}
 error range =
     Rule.error
-        { message = "REPLACEME"
-        , details = [ "REPLACEME" ]
+        { message = "This function always returns Cmd.none"
+        , details =
+            [ "Since this function returns Cmd.none in all cases, you can simplify it by having it not return a Cmd"
+            ]
         }
         range
