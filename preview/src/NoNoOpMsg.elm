@@ -80,7 +80,7 @@ error node =
         , details =
             [ "A Msg name should explain what happened. NoOp means tat nothing happened."
             , "Even if you don't care about handling the event, give it a name that describes what happened."
-            , "Noah's talk on it: https://www.youtube.com/watch?v=w6OVDBqergc"
+            , "@noahzgordon's talk on it: https://www.youtube.com/watch?v=w6OVDBqergc"
             ]
         }
         (Node.range node)
