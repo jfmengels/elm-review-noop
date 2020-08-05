@@ -6,7 +6,10 @@ module NoNoOpMsg exposing (rule)
 
 -}
 
-import Review.Rule as Rule exposing (Rule)
+import Elm.Syntax.Declaration as Declaration exposing (Declaration)
+import Elm.Syntax.Expression exposing (Expression)
+import Elm.Syntax.Node as Node exposing (Node)
+import Review.Rule as Rule exposing (Error, Rule)
 
 
 {-| Reports... REPLACEME
@@ -39,12 +42,46 @@ This rule is not useful when REPLACEME.
 You can try this rule out by running the following command:
 
 ```bash
-elm-review --template jfmengels/elm-review-noop/example --rules NoNoOpMsg
+elm - review --template jfmengels/elm-review-noop/example --rules NoNoOpMsg
 ```
 
 -}
 rule : Rule
 rule =
     Rule.newModuleRuleSchema "NoNoOpMsg" ()
-        -- Add your visitors
+        |> Rule.withSimpleDeclarationVisitor declarationVisitor
         |> Rule.fromModuleRuleSchema
+
+
+declarationVisitor : Node Declaration -> List (Error {})
+declarationVisitor node =
+    case Node.value node of
+        Declaration.CustomTypeDeclaration { constructors } ->
+            constructors
+                --|> List.filter ()
+                |> List.map
+                    (\constructor ->
+                        constructor
+                            |> Node.value
+                            |> .name
+                            |> error
+                    )
+
+        _ ->
+            []
+
+
+error : Node String -> Error {}
+error node =
+    Rule.error
+        { message = "Don't use NoOp, give it a better name"
+        , details = [ "Go watch Noah's talk!" ]
+        }
+        (Node.range node)
+
+
+
+-- a + b
+-- Node (OperatorApplication "+" _
+--    (Node (FunctionOrValue [] "a"))
+--    (Node (FunctionOrValue [] "b"))
