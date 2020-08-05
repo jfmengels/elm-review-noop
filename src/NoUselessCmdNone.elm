@@ -6,7 +6,9 @@ module NoUselessCmdNone exposing (rule)
 
 -}
 
-import Review.Rule as Rule exposing (Rule)
+import Elm.Syntax.Expression as Expression exposing (Expression)
+import Elm.Syntax.Node as Node exposing (Node)
+import Review.Rule as Rule exposing (Error, Rule)
 
 
 {-| Reports functions that never make use of their power to return Cmds.
@@ -55,5 +57,29 @@ elm - review --template jfmengels/elm-review-noop/example --rules NoUselessCmdNo
 rule : Rule
 rule =
     Rule.newModuleRuleSchema "NoUselessCmdNone" ()
-        -- Add your visitors
+        |> Rule.withSimpleExpressionVisitor expressionVisitor
         |> Rule.fromModuleRuleSchema
+
+
+expressionVisitor : Node Expression -> List (Error {})
+expressionVisitor node =
+    case Node.value node of
+        Expression.CaseExpression { cases } ->
+            cases
+                |> List.concatMap
+                    (\( _, expression ) ->
+                        case Node.value expression of
+                            Expression.TupledExpression (_ :: cmdExpression :: []) ->
+                                [ Rule.error
+                                    { message = "REPLACEME"
+                                    , details = [ "REPLACEME" ]
+                                    }
+                                    (Node.range cmdExpression)
+                                ]
+
+                            _ ->
+                                []
+                    )
+
+        _ ->
+            []

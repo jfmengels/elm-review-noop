@@ -11,14 +11,19 @@ all =
         [ test "should report an error when REPLACEME" <|
             \() ->
                 """module A exposing (..)
-a = 1
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        ClickedIncrement ->
+            ( model + 1, Cmd.none )
 """
                     |> Review.Test.run rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = "REPLACEME"
                             , details = [ "REPLACEME" ]
-                            , under = "REPLACEME"
+                            , under = "Cmd.none"
                             }
                         ]
         ]
