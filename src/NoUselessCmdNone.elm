@@ -10,6 +10,7 @@ import Elm.Syntax.Expression as Expression exposing (Expression)
 import Elm.Syntax.Node as Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Range)
 import Review.Rule as Rule exposing (Error, Rule)
+import Scope
 
 
 {-| Reports functions that never make use of their power to return Cmds.
@@ -57,13 +58,25 @@ elm - review --template jfmengels/elm-review-noop/example --rules NoUselessCmdNo
 -}
 rule : Rule
 rule =
-    Rule.newModuleRuleSchema "NoUselessCmdNone" ()
-        |> Rule.withSimpleExpressionVisitor expressionVisitor
+    Rule.newModuleRuleSchema "NoUselessCmdNone" initialContext
+        |> Scope.addModuleVisitors
+        |> Rule.withExpressionEnterVisitor expressionVisitor
         |> Rule.fromModuleRuleSchema
 
 
-expressionVisitor : Node Expression -> List (Error {})
-expressionVisitor node =
+type alias Context =
+    { scope : Scope.ModuleContext
+    }
+
+
+initialContext : Context
+initialContext =
+    { scope = Scope.initialModuleContext
+    }
+
+
+expressionVisitor : Node Expression -> Context -> ( List (Error {}), Context )
+expressionVisitor node context =
     case Node.value node of
         Expression.CaseExpression { cases } ->
             let
@@ -81,15 +94,17 @@ expressionVisitor node =
                         cases
             in
             if List.all ((/=) Nothing) rangesWithViolation then
-                rangesWithViolation
+                ( rangesWithViolation
                     |> List.filterMap identity
                     |> List.map error
+                , context
+                )
 
             else
-                []
+                ( [], context )
 
         _ ->
-            []
+            ( [], context )
 
 
 error : Range -> Error {}
