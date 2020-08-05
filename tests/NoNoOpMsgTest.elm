@@ -35,6 +35,20 @@ type Msg
                             , under = "NoOp"
                             }
                         ]
+        , test "should report an error when there is a Noop Msg constructor" <|
+            \() ->
+                """module A exposing (..)
+type Msg
+ = Noop
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Noop"
+                            }
+                        ]
         , test "should not report an error when there is no custom type" <|
             \() ->
                 """module A exposing (..)

@@ -64,7 +64,11 @@ declarationVisitor node =
                             |> Node.value
                             |> .name
                     )
-                |> List.filter (\constructorName -> Node.value constructorName == "NoOp")
+                |> List.filter
+                    (\constructorName ->
+                        (Node.value constructorName == "NoOp")
+                            || (Node.value constructorName == "Noop")
+                    )
                 |> List.map error
 
         _ ->
@@ -82,10 +86,3 @@ error node =
             ]
         }
         (Node.range node)
-
-
-
--- a + b
--- Node (OperatorApplication "+" _
---    (Node (FunctionOrValue [] "a"))
---    (Node (FunctionOrValue [] "b"))
