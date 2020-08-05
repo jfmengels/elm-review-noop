@@ -77,22 +77,23 @@ update msg model =
                             }
                             |> Review.Test.atExactly { start = { row = 8, column = 22 }, end = { row = 8, column = 30 } }
                         ]
-        , test "should report errors when Cmd.none is used using an unqualified import" <|
-            \() ->
-                """module A exposing (..)
-import Cmd exposing (..)
+        , Test.skip <|
+            test "should report errors when Cmd.none is used using an unqualified import" <|
+                \() ->
+                    """module A exposing (..)
+import Cmd exposing (none)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     ClickedIncrement ->
         ( model + 1, none )
 """
-                    |> Review.Test.run rule
-                    |> Review.Test.expectErrors
-                        [ Review.Test.error
-                            { message = "REPLACEME"
-                            , details = [ "REPLACEME" ]
-                            , under = "none"
-                            }
-                        ]
+                        |> Review.Test.run rule
+                        |> Review.Test.expectErrors
+                            [ Review.Test.error
+                                { message = "REPLACEME"
+                                , details = [ "REPLACEME" ]
+                                , under = "none"
+                                }
+                            ]
         ]

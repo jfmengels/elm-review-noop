@@ -587,6 +587,7 @@ elmCorePrelude =
         , exposingList =
             explicit
                 [ Exposing.TypeExpose { name = "Cmd", open = Nothing }
+                , Exposing.FunctionExpose "none"
                 ]
         }
     , createFakeImport
