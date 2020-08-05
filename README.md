@@ -1,7 +1,10 @@
+*NOTES*: THIS IS UNPOLISHED
+- The `NoUselessCmdNone` is not yet polished.
+- These rules, if published, will likely not (all) end up in this package.
+
 # elm-review-noop
 
 Provides [`elm-review`](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) rules to forbid NoOp messages.
-
 
 ## Provided rules
 
