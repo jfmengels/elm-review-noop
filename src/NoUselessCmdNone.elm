@@ -8,6 +8,7 @@ module NoUselessCmdNone exposing (rule)
 
 import Elm.Syntax.Expression as Expression exposing (Expression)
 import Elm.Syntax.Node as Node exposing (Node(..))
+import Elm.Syntax.Range exposing (Range)
 import Review.Rule as Rule exposing (Error, Rule)
 
 
@@ -65,21 +66,36 @@ expressionVisitor : Node Expression -> List (Error {})
 expressionVisitor node =
     case Node.value node of
         Expression.CaseExpression { cases } ->
-            cases
-                |> List.concatMap
-                    (\( _, expression ) ->
-                        case Node.value expression of
-                            Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue [ "Cmd" ] "none")) :: []) ->
-                                [ Rule.error
-                                    { message = "REPLACEME"
-                                    , details = [ "REPLACEME" ]
-                                    }
-                                    range
-                                ]
+            let
+                rangesWithViolation : List (Maybe Range)
+                rangesWithViolation =
+                    List.map
+                        (\( _, expression ) ->
+                            case Node.value expression of
+                                Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue [ "Cmd" ] "none")) :: []) ->
+                                    Just range
 
-                            _ ->
-                                []
-                    )
+                                _ ->
+                                    Nothing
+                        )
+                        cases
+            in
+            if List.all ((/=) Nothing) rangesWithViolation then
+                rangesWithViolation
+                    |> List.filterMap identity
+                    |> List.map error
+
+            else
+                []
 
         _ ->
             []
+
+
+error : Range -> Error {}
+error range =
+    Rule.error
+        { message = "REPLACEME"
+        , details = [ "REPLACEME" ]
+        }
+        range
