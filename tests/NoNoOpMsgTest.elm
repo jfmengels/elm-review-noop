@@ -5,6 +5,19 @@ import Review.Test
 import Test exposing (Test, describe, test)
 
 
+message : String
+message =
+    "Don't use NoOp, give it a better name"
+
+
+details : List String
+details =
+    [ "A Msg name should explain what happened. NoOp means tat nothing happened."
+    , "Even if you don't care about handling the event, give it a name that describes what happened."
+    , "Noah's talk on it: https://www.youtube.com/watch?v=w6OVDBqergc"
+    ]
+
+
 all : Test
 all =
     describe "NoNoOpMsg"
@@ -17,8 +30,8 @@ type Msg
                     |> Review.Test.run rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
-                            { message = "Don't use NoOp, give it a better name"
-                            , details = [ "Go watch Noah's talk!" ]
+                            { message = message
+                            , details = details
                             , under = "NoOp"
                             }
                         ]
