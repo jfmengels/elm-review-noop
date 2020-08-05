@@ -7,7 +7,7 @@ module NoUselessCmdNone exposing (rule)
 -}
 
 import Elm.Syntax.Expression as Expression exposing (Expression)
-import Elm.Syntax.Node as Node exposing (Node)
+import Elm.Syntax.Node as Node exposing (Node(..))
 import Review.Rule as Rule exposing (Error, Rule)
 
 
@@ -69,12 +69,12 @@ expressionVisitor node =
                 |> List.concatMap
                     (\( _, expression ) ->
                         case Node.value expression of
-                            Expression.TupledExpression (_ :: cmdExpression :: []) ->
+                            Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue [ "Cmd" ] "none")) :: []) ->
                                 [ Rule.error
                                     { message = "REPLACEME"
                                     , details = [ "REPLACEME" ]
                                     }
-                                    (Node.range cmdExpression)
+                                    range
                                 ]
 
                             _ ->

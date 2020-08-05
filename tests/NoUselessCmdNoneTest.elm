@@ -8,7 +8,7 @@ import Test exposing (Test, describe, test)
 all : Test
 all =
     describe "NoUselessCmdNone"
-        [ test "should report an error when REPLACEME" <|
+        [ test "should report an error when all branches return a tuple with Cmd.none" <|
             \() ->
                 """module A exposing (..)
 
@@ -26,4 +26,16 @@ update msg model =
                             , under = "Cmd.none"
                             }
                         ]
+        , test "should not report an error when a branch returns something else than Cmd.none" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        ClickedIncrement ->
+            ( model + 1, 1 )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectNoErrors
         ]
