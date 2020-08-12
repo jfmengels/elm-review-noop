@@ -113,14 +113,17 @@ expressionVisitor node context =
 
 
 resultsInCmdNone : Context -> Node Expression -> Maybe Range
-resultsInCmdNone context expression =
-    case Node.value expression of
+resultsInCmdNone context node =
+    case Node.value node of
         Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue moduleName "none")) :: []) ->
             if Scope.moduleNameForValue context.scope "none" moduleName == [ "Platform", "Cmd" ] then
                 Just range
 
             else
                 Nothing
+
+        Expression.LetExpression { expression } ->
+            resultsInCmdNone context expression
 
         _ ->
             Nothing

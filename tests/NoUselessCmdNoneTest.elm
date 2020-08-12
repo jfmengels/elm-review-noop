@@ -182,4 +182,34 @@ update msg model =
 """
                     |> Review.Test.run rule
                     |> Review.Test.expectNoErrors
+        , test "should report errors when a branch contains a let expression but returns Cmd.none" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  case msg of
+    ClickedIncrement ->
+        let
+          _ = ()
+        in
+        ( model + 1, Cmd.none )
+    ClickedDecrement ->
+        ( model - 1, Cmd.none )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 10, column = 22 }, end = { row = 10, column = 30 } }
+                        , Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 12, column = 22 }, end = { row = 12, column = 30 } }
+                        ]
         ]
