@@ -77,14 +77,12 @@ initialContext =
 
 expressionVisitor : Node Expression -> Context -> ( List (Error {}), Context )
 expressionVisitor node context =
-    case Node.value node of
-        Expression.CaseExpression { cases } ->
+    case getBranches node of
+        Just expressions ->
             let
                 rangesWithViolation : List (Maybe Range)
                 rangesWithViolation =
-                    List.map
-                        (\( _, expression ) -> resultsInCmdNone context expression)
-                        cases
+                    List.map (resultsInCmdNone context) expressions
             in
             if List.all ((/=) Nothing) rangesWithViolation then
                 ( rangesWithViolation
@@ -96,20 +94,24 @@ expressionVisitor node context =
             else
                 ( [], context )
 
-        Expression.IfBlock _ ifExpr elseExpr ->
-            case Maybe.map2 Tuple.pair (resultsInCmdNone context ifExpr) (resultsInCmdNone context elseExpr) of
-                Just ( ifRange, elseRange ) ->
-                    ( [ error ifRange
-                      , error elseRange
-                      ]
-                    , context
-                    )
+        Nothing ->
+            ( [], context )
 
-                Nothing ->
-                    ( [], context )
+
+getBranches : Node Expression -> Maybe (List (Node Expression))
+getBranches node =
+    case Node.value node of
+        Expression.CaseExpression { cases } ->
+            Just (List.map Tuple.second cases)
+
+        Expression.IfBlock _ ifExpr elseExpr ->
+            Just [ ifExpr, elseExpr ]
+
+        Expression.LetExpression { expression } ->
+            getBranches expression
 
         _ ->
-            ( [], context )
+            Nothing
 
 
 resultsInCmdNone : Context -> Node Expression -> Maybe Range
