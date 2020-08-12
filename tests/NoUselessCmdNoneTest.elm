@@ -126,4 +126,30 @@ update msg model =
                             }
                             |> Review.Test.atExactly { start = { row = 7, column = 22 }, end = { row = 7, column = 26 } }
                         ]
+        , test "should report errors when Cmd.none is used in both branches of an if else expression" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  if something then
+    ( model + 1, Cmd.none )
+  else
+    ( model - 1, Cmd.none )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 6, column = 18 }, end = { row = 6, column = 26 } }
+                        , Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 8, column = 18 }, end = { row = 8, column = 26 } }
+                        ]
         ]

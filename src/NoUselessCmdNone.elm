@@ -96,6 +96,18 @@ expressionVisitor node context =
             else
                 ( [], context )
 
+        Expression.IfBlock _ ifExpr elseExpr ->
+            case Maybe.map2 Tuple.pair (resultsInCmdNone context ifExpr) (resultsInCmdNone context elseExpr) of
+                Just ( ifRange, elseRange ) ->
+                    ( [ error ifRange
+                      , error elseRange
+                      ]
+                    , context
+                    )
+
+                Nothing ->
+                    ( [], context )
+
         _ ->
             ( [], context )
 
