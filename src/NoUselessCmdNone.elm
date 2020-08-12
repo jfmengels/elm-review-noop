@@ -86,7 +86,7 @@ expressionVisitor node context =
                         (\( _, expression ) ->
                             case Node.value expression of
                                 Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue moduleName "none")) :: []) ->
-                                    if Scope.moduleNameForValue context.scope "none" moduleName == [ "Cmd" ] then
+                                    if Scope.moduleNameForValue context.scope "none" moduleName == [ "Platform", "Cmd" ] then
                                         Just range
 
                                     else

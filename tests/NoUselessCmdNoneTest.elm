@@ -88,23 +88,42 @@ update msg model =
                             }
                             |> Review.Test.atExactly { start = { row = 8, column = 22 }, end = { row = 8, column = 30 } }
                         ]
-        , Test.skip <|
-            test "should report errors when Cmd.none is used using an unqualified import" <|
-                \() ->
-                    """module A exposing (..)
-import Cmd exposing (none)
+        , test "should report errors when Cmd.none is used using an unqualified import" <|
+            \() ->
+                """module A exposing (..)
+import Platform.Cmd exposing (none)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     ClickedIncrement ->
         ( model + 1, none )
 """
-                        |> Review.Test.run rule
-                        |> Review.Test.expectErrors
-                            [ Review.Test.error
-                                { message = message
-                                , details = details
-                                , under = "none"
-                                }
-                            ]
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 7, column = 22 }, end = { row = 7, column = 26 } }
+                        ]
+        , test "should report errors when Cmd.none is used using exposing (..)" <|
+            \() ->
+                """module A exposing (..)
+import Platform.Cmd exposing (..)
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  case msg of
+    ClickedIncrement ->
+        ( model + 1, none )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 7, column = 22 }, end = { row = 7, column = 26 } }
+                        ]
         ]
