@@ -165,6 +165,40 @@ update msg model =
                             }
                             |> Review.Test.atExactly { start = { row = 8, column = 18 }, end = { row = 8, column = 26 } }
                         ]
+        , test "should report errors when Cmd.none is used in all branches of a nested if expression" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  if something then
+    ( model + 1, Cmd.none )
+  else if somethingElse then
+    ( model - 1, Cmd.none )
+  else
+    ( model - 1, Cmd.none )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 6, column = 18 }, end = { row = 6, column = 26 } }
+                        , Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 8, column = 18 }, end = { row = 8, column = 26 } }
+                        , Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                            |> Review.Test.atExactly { start = { row = 10, column = 18 }, end = { row = 10, column = 26 } }
+                        ]
         , test "should not report errors when something else than Cmd.none is used in a let expression" <|
             \() ->
                 """module A exposing (..)

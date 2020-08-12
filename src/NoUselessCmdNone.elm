@@ -11,6 +11,7 @@ import Elm.Syntax.Node as Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Range)
 import Review.Rule as Rule exposing (Error, Rule)
 import Scope
+import Set exposing (Set)
 
 
 {-| Reports functions that never make use of their power to return Cmds.
@@ -61,17 +62,20 @@ rule =
     Rule.newModuleRuleSchema "NoUselessCmdNone" initialContext
         |> Scope.addModuleVisitors
         |> Rule.withExpressionEnterVisitor expressionVisitor
+        |> Rule.withFinalModuleEvaluation finalEvaluation
         |> Rule.fromModuleRuleSchema
 
 
 type alias Context =
     { scope : Scope.ModuleContext
+    , ranges : List Range
     }
 
 
 initialContext : Context
 initialContext =
     { scope = Scope.initialModuleContext
+    , ranges = []
     }
 
 
@@ -85,10 +89,14 @@ expressionVisitor node context =
                     List.map (resultsInCmdNone context) expressions
             in
             if List.all ((/=) Nothing) rangesWithViolation then
-                ( rangesWithViolation
-                    |> List.filterMap identity
-                    |> List.map error
-                , context
+                ( []
+                , { context
+                    | ranges =
+                        (rangesWithViolation
+                            |> List.filterMap identity
+                        )
+                            ++ context.ranges
+                  }
                 )
 
             else
@@ -105,7 +113,12 @@ getBranches node =
             Just (List.map Tuple.second cases)
 
         Expression.IfBlock _ ifExpr elseExpr ->
-            Just [ ifExpr, elseExpr ]
+            case Node.value elseExpr of
+                Expression.IfBlock _ _ _ ->
+                    Just (ifExpr :: Maybe.withDefault [] (getBranches elseExpr))
+
+                _ ->
+                    Just [ ifExpr, elseExpr ]
 
         Expression.LetExpression { expression } ->
             getBranches expression
@@ -131,6 +144,24 @@ resultsInCmdNone context node =
             Nothing
 
 
+finalEvaluation : Context -> List (Error {})
+finalEvaluation context =
+    context.ranges
+        |> uniqueBy rangeToString
+        |> List.map error
+
+
+rangeToString : Range -> String
+rangeToString range =
+    [ range.start.row
+    , range.start.column
+    , range.end.row
+    , range.end.column
+    ]
+        |> List.map String.fromInt
+        |> String.join "-"
+
+
 error : Range -> Error {}
 error range =
     Rule.error
@@ -140,3 +171,26 @@ error range =
             ]
         }
         range
+
+
+uniqueBy : (a -> comparable) -> List a -> List a
+uniqueBy f list =
+    uniqueHelp f Set.empty list []
+
+
+uniqueHelp : (a -> comparable) -> Set comparable -> List a -> List a -> List a
+uniqueHelp f existing remaining accumulator =
+    case remaining of
+        [] ->
+            List.reverse accumulator
+
+        first :: rest ->
+            let
+                computedFirst =
+                    f first
+            in
+            if Set.member computedFirst existing then
+                uniqueHelp f existing rest accumulator
+
+            else
+                uniqueHelp f (Set.insert computedFirst existing) rest (first :: accumulator)
