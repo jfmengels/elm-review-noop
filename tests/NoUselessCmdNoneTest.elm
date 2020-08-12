@@ -212,4 +212,21 @@ update msg model =
                             }
                             |> Review.Test.atExactly { start = { row = 12, column = 22 }, end = { row = 12, column = 30 } }
                         ]
+        , test "should not report Cmd.none that's not in a return value" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    if (case msg of
+          ClickedIncrement ->
+            ( model + 1, Cmd.none )
+        ) |> Tuple.first
+    then
+        (model, cmd)
+    else
+        (model, cmd2)
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors []
         ]
