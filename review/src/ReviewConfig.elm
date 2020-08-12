@@ -42,5 +42,5 @@ config =
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
-        |> Rule.ignoreErrorsForDirectories [ "src-gen/" ]
     ]
+        |> List.map (Rule.ignoreErrorsForFiles [ "src/Scope.elm" ])
