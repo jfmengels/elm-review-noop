@@ -83,18 +83,7 @@ expressionVisitor node context =
                 rangesWithViolation : List (Maybe Range)
                 rangesWithViolation =
                     List.map
-                        (\( _, expression ) ->
-                            case Node.value expression of
-                                Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue moduleName "none")) :: []) ->
-                                    if Scope.moduleNameForValue context.scope "none" moduleName == [ "Platform", "Cmd" ] then
-                                        Just range
-
-                                    else
-                                        Nothing
-
-                                _ ->
-                                    Nothing
-                        )
+                        (\( _, expression ) -> resultsInCmdNone context expression)
                         cases
             in
             if List.all ((/=) Nothing) rangesWithViolation then
@@ -109,6 +98,20 @@ expressionVisitor node context =
 
         _ ->
             ( [], context )
+
+
+resultsInCmdNone : Context -> Node Expression -> Maybe Range
+resultsInCmdNone context expression =
+    case Node.value expression of
+        Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue moduleName "none")) :: []) ->
+            if Scope.moduleNameForValue context.scope "none" moduleName == [ "Platform", "Cmd" ] then
+                Just range
+
+            else
+                Nothing
+
+        _ ->
+            Nothing
 
 
 error : Range -> Error {}
