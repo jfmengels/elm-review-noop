@@ -165,4 +165,21 @@ update msg model =
                             }
                             |> Review.Test.atExactly { start = { row = 8, column = 18 }, end = { row = 8, column = 26 } }
                         ]
+        , test "should not report errors when something else than Cmd.none is used in a let expression" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  case msg of
+    ClickedIncrement ->
+        let
+          _ = ()
+        in
+        ( model + 1, cmd )
+    ClickedDecrement ->
+        ( model - 1, Cmd.none )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectNoErrors
         ]
