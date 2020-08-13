@@ -173,6 +173,10 @@ error range =
         range
 
 
+
+-- Taken from elm-community/list-extra
+
+
 uniqueBy : (a -> comparable) -> List a -> List a
 uniqueBy f list =
     uniqueHelp f Set.empty list []
@@ -186,6 +190,7 @@ uniqueHelp f existing remaining accumulator =
 
         first :: rest ->
             let
+                computedFirst : comparable
                 computedFirst =
                     f first
             in
