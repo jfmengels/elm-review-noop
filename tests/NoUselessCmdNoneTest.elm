@@ -265,4 +265,31 @@ update msg model =
 """
                     |> Review.Test.run rule
                     |> Review.Test.expectNoErrors
+        , test "should report errors for let declarations" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  case msg of
+    ClickedIncrement ->
+        let
+          ( thing, cmd ) =
+            case msg of
+                ClickedIncrement ->
+                    ( model + 1, Cmd.none )
+        in
+        ( thing, cmd )
+
+    ClickedDecrement ->
+        ( model - 1, cmd )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectErrors
+                        [ Review.Test.error
+                            { message = message
+                            , details = details
+                            , under = "Cmd.none"
+                            }
+                        ]
         ]
