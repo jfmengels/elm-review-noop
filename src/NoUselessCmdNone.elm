@@ -46,7 +46,7 @@ import Set exposing (Set)
 
 ## When (not) to enable this rule
 
-This rule is not useful when you are writing a package.
+This rule is not useful when you are writing a package that does not deal with `Cmd`s.
 
 
 ## Try it out
