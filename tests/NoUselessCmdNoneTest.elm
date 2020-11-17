@@ -246,4 +246,23 @@ update msg model =
                             }
                             |> Review.Test.atExactly { start = { row = 12, column = 22 }, end = { row = 12, column = 30 } }
                         ]
+        , test "should not report errors for nested case expressions" <|
+            \() ->
+                """module A exposing (..)
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+  case msg of
+    Something ->
+        case foo of
+            ClickedIncrement ->
+                ( model + 1, Cmd.none )
+            ClickedDecrement ->
+                ( model - 1, Cmd.none )
+
+    Something cmd ->
+        ( model, cmd )
+"""
+                    |> Review.Test.run rule
+                    |> Review.Test.expectNoErrors
         ]

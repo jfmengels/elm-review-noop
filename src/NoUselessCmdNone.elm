@@ -6,6 +6,7 @@ module NoUselessCmdNone exposing (rule)
 
 -}
 
+import Elm.Syntax.Declaration as Declaration exposing (Declaration)
 import Elm.Syntax.Expression as Expression exposing (Expression)
 import Elm.Syntax.Node as Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Range)
@@ -61,7 +62,7 @@ rule : Rule
 rule =
     Rule.newModuleRuleSchema "NoUselessCmdNone" initialContext
         |> Scope.addModuleVisitors
-        |> Rule.withExpressionEnterVisitor expressionVisitor
+        |> Rule.withDeclarationEnterVisitor declarationVisitor
         |> Rule.withFinalModuleEvaluation finalEvaluation
         |> Rule.fromModuleRuleSchema
 
@@ -79,7 +80,17 @@ initialContext =
     }
 
 
-expressionVisitor : Node Expression -> Context -> ( List (Error {}), Context )
+declarationVisitor : Node Declaration -> Context -> ( List nothing, Context )
+declarationVisitor node context =
+    case Node.value node of
+        Declaration.FunctionDeclaration function ->
+            expressionVisitor (Node.value function.declaration).expression context
+
+        _ ->
+            ( [], context )
+
+
+expressionVisitor : Node Expression -> Context -> ( List nothing, Context )
 expressionVisitor node context =
     case getBranches node of
         Just expressions ->
