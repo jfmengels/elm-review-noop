@@ -63,6 +63,7 @@ rule =
     Rule.newModuleRuleSchema "NoUselessCmdNone" initialContext
         |> Scope.addModuleVisitors
         |> Rule.withDeclarationEnterVisitor declarationVisitor
+        |> Rule.withExpressionEnterVisitor expressionVisitor
         |> Rule.withFinalModuleEvaluation finalEvaluation
         |> Rule.fromModuleRuleSchema
 
@@ -84,7 +85,7 @@ declarationVisitor : Node Declaration -> Context -> ( List nothing, Context )
 declarationVisitor node context =
     case Node.value node of
         Declaration.FunctionDeclaration function ->
-            expressionVisitor (Node.value function.declaration).expression context
+            ( [], findViolations (Node.value function.declaration).expression context )
 
         _ ->
             ( [], context )
@@ -92,6 +93,31 @@ declarationVisitor node context =
 
 expressionVisitor : Node Expression -> Context -> ( List nothing, Context )
 expressionVisitor node context =
+    case Node.value node of
+        Expression.LetExpression { declarations } ->
+            ( []
+            , List.foldl
+                findViolationsForLetDeclaration
+                context
+                declarations
+            )
+
+        _ ->
+            ( [], context )
+
+
+findViolationsForLetDeclaration : Node Expression.LetDeclaration -> Context -> Context
+findViolationsForLetDeclaration letDeclaration context =
+    case Node.value letDeclaration of
+        Expression.LetFunction function ->
+            findViolations (Node.value function.declaration).expression context
+
+        Expression.LetDestructuring _ expression ->
+            findViolations expression context
+
+
+findViolations : Node Expression -> Context -> Context
+findViolations node context =
     case getBranches node of
         Just expressions ->
             let
@@ -100,21 +126,19 @@ expressionVisitor node context =
                     List.map (resultsInCmdNone context) expressions
             in
             if List.all ((/=) Nothing) rangesWithViolation then
-                ( []
-                , { context
+                { context
                     | ranges =
                         (rangesWithViolation
                             |> List.filterMap identity
                         )
                             ++ context.ranges
-                  }
-                )
+                }
 
             else
-                ( [], context )
+                context
 
         Nothing ->
-            ( [], context )
+            context
 
 
 getBranches : Node Expression -> Maybe (List (Node Expression))
