@@ -10,8 +10,8 @@ import Elm.Syntax.Declaration as Declaration exposing (Declaration)
 import Elm.Syntax.Expression as Expression exposing (Expression)
 import Elm.Syntax.Node as Node exposing (Node(..))
 import Elm.Syntax.Range exposing (Range)
+import Review.ModuleNameLookupTable as ModuleNameLookupTable exposing (ModuleNameLookupTable)
 import Review.Rule as Rule exposing (Error, Rule)
-import Scope
 import Set exposing (Set)
 
 
@@ -60,8 +60,7 @@ elm - review --template jfmengels/elm-review-noop/preview --rules NoUselessCmdNo
 -}
 rule : Rule
 rule =
-    Rule.newModuleRuleSchema "NoUselessCmdNone" initialContext
-        |> Scope.addModuleVisitors
+    Rule.newModuleRuleSchemaUsingContextCreator "NoUselessCmdNone" initialContext
         |> Rule.withDeclarationEnterVisitor declarationVisitor
         |> Rule.withExpressionEnterVisitor expressionVisitor
         |> Rule.withFinalModuleEvaluation finalEvaluation
@@ -69,16 +68,20 @@ rule =
 
 
 type alias Context =
-    { scope : Scope.ModuleContext
+    { lookupTable : ModuleNameLookupTable
     , ranges : List Range
     }
 
 
-initialContext : Context
+initialContext : Rule.ContextCreator () Context
 initialContext =
-    { scope = Scope.initialModuleContext
-    , ranges = []
-    }
+    Rule.initContextCreator
+        (\lookupTable () ->
+            { lookupTable = lookupTable
+            , ranges = []
+            }
+        )
+        |> Rule.withModuleNameLookupTable
 
 
 declarationVisitor : Node Declaration -> Context -> ( List nothing, Context )
@@ -165,12 +168,13 @@ getBranches node =
 resultsInCmdNone : Context -> Node Expression -> Maybe Range
 resultsInCmdNone context node =
     case Node.value node of
-        Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue moduleName "none")) :: []) ->
-            if Scope.moduleNameForValue context.scope "none" moduleName == [ "Platform", "Cmd" ] then
-                Just range
+        Expression.TupledExpression (_ :: (Node range (Expression.FunctionOrValue _ "none")) :: []) ->
+            case ModuleNameLookupTable.moduleNameAt context.lookupTable range of
+                Just [ "Platform", "Cmd" ] ->
+                    Just range
 
-            else
-                Nothing
+                _ ->
+                    Nothing
 
         Expression.LetExpression { expression } ->
             resultsInCmdNone context expression

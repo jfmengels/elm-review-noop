@@ -1,6 +1,8 @@
 module NoUselessCmdNoneTest exposing (all)
 
+import Dependencies.ElmCore
 import NoUselessCmdNone exposing (rule)
+import Review.Project as Project exposing (Project)
 import Review.Test
 import Test exposing (Test, describe, test)
 
@@ -16,6 +18,12 @@ details =
     ]
 
 
+project : Project
+project =
+    Project.new
+        |> Project.addDependency Dependencies.ElmCore.dependency
+
+
 all : Test
 all =
     describe "NoUselessCmdNone"
@@ -29,7 +37,7 @@ update msg model =
         ClickedIncrement ->
             ( model + 1, Cmd.none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
@@ -47,7 +55,7 @@ update msg model =
         ClickedIncrement ->
             ( model + 1, 1 )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectNoErrors
         , test "should not report an error when some branches return a real command" <|
             \() ->
@@ -60,7 +68,7 @@ update msg model =
     ClickedDecrement ->
         ( model - 1, Bugsnag.error "User wanted to decrement the counter!" )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectNoErrors
         , test "should report errors when all branches return Cmd.none" <|
             \() ->
@@ -73,7 +81,7 @@ update msg model =
     ClickedDecrement ->
         ( model - 1, Cmd.none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
@@ -98,7 +106,7 @@ update msg model =
     ClickedIncrement ->
         ( model + 1, none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
@@ -117,14 +125,13 @@ update msg model =
     ClickedIncrement ->
         ( model + 1, none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
                             , details = details
                             , under = "none"
                             }
-                            |> Review.Test.atExactly { start = { row = 7, column = 22 }, end = { row = 7, column = 26 } }
                         ]
         , test "should not report errors when something else than Cmd.none is used in a branch of an if expression" <|
             \() ->
@@ -137,7 +144,7 @@ update msg model =
   else
     ( model - 1, cmd )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectNoErrors
         , test "should report errors when Cmd.none is used in both branches of an if expression" <|
             \() ->
@@ -150,7 +157,7 @@ update msg model =
   else
     ( model - 1, Cmd.none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
@@ -178,7 +185,7 @@ update msg model =
   else
     ( model - 1, Cmd.none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
@@ -214,7 +221,7 @@ update msg model =
     ClickedDecrement ->
         ( model - 1, Cmd.none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectNoErrors
         , test "should report errors when a branch contains a let expression but returns Cmd.none" <|
             \() ->
@@ -231,7 +238,7 @@ update msg model =
     ClickedDecrement ->
         ( model - 1, Cmd.none )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
@@ -263,7 +270,7 @@ update msg model =
     Something cmd ->
         ( model, cmd )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectNoErrors
         , test "should report errors for let declarations" <|
             \() ->
@@ -284,7 +291,7 @@ update msg model =
     ClickedDecrement ->
         ( model - 1, cmd )
 """
-                    |> Review.Test.run rule
+                    |> Review.Test.runWithProjectData project rule
                     |> Review.Test.expectErrors
                         [ Review.Test.error
                             { message = message
